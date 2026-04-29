@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Fiscalização</title>
+    <style>
+        :root {
+            --primary-color: #003366;
+            --accent-color: #00509e;
+            --danger-color: #cc0000;
+            --bg-body: #eef2f7;
+            --card-white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); padding-top: 100px; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: fixed; top: 0; width: 100%; height: 80px;
+            background: var(--card-white); padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; justify-content: flex-end; align-items: center; z-index: 1000;
+        }
+
+        .user-profile-box {
+            display: flex; flex-direction: column; align-items: center; text-decoration: none;
+        }
+
+        .user-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--primary-color);
+        }
+
+        .user-name-label {
+            font-size: 0.7rem; color: #444; font-weight: 700; margin-top: 4px; text-transform: lowercase;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .container { max-width: 500px; margin: 0 auto; padding: 10px; }
+
+        /* O CARD UNIFICADO */
+        .registro-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            overflow: hidden; /* Garante que nada saia das bordas arredondadas */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border: 1px solid #d1d5db;
+        }
+
+        /* CABEÇALHO DO PROPRIETÁRIO + VEÍCULO */
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 20px;
+            color: white;
+        }
+
+        .prop-nome { font-size: 1.2rem; font-weight: 800; display: block; margin-bottom: 2px; }
+        .prop-cidade { font-size: 0.8rem; opacity: 0.9; display: block; margin-bottom: 12px; }
+
+        .veiculo-info-linha {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .veiculo-texto { font-size: 0.9rem; font-weight: 600; }
+        .placa-pill {
+            background: white; color: var(--primary-color);
+            padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 900;
+        }
+
+        /* SEÇÃO DE FOTOS (Logo abaixo dos dados) */
+        .fotos-galeria {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px;
+            background: #f8fafc;
+        }
+
+        .foto-veiculo {
+            width: 100%; height: 140px; object-fit: cover;
+            border-radius: 4px; border: 1px solid #e2e8f0;
+        }
+
+        /* HISTÓRICO E AÇÕES */
+        .card-body { padding: 20px; }
+
+        .secao-titulo {
+            font-size: 0.75rem; color: #64748b; font-weight: 800;
+            text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;
+        }
+
+        .multa-tag {
+            background: #fff1f2; border-left: 4px solid var(--danger-color);
+            padding: 12px; border-radius: 6px; margin-bottom: 8px;
+        }
+
+        .multa-valor { color: var(--danger-color); font-weight: 800; font-size: 1rem; }
+        .multa-meta { display: block; font-size: 0.75rem; color: #7f8c8d; margin-top: 4px; }
+
+        .btn-multar {
+            display: block; width: 100%; background: var(--danger-color);
+            color: white; text-align: center; padding: 15px; border-radius: 12px;
+            text-decoration: none; font-weight: 800; margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .btn-multar:active { transform: scale(0.97); }
+
+        @media (max-width: 480px) {
+            .fotos-galeria { grid-template-columns: 1fr; }
+            .foto-veiculo { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{% url 'logout_confirm' %}" class="user-profile-box">
+            {% if request.user.foto %}
+                <img src="{{ request.user.foto.url }}" class="user-avatar" alt="Agente">
+            {% else %}
+                <div class="user-avatar" style="background:#cbd5e1; display:flex; align-items:center; justify-content:center; color:white; font-size:10px;">SAIR</div>
+            {% endif %}
+            <span class="user-name-label">{{ request.user.username }}</span>
+        </a>
+    </nav>
+
+    <main class="container">
+        {% for v in veiculos %}
+        <article class="registro-card">
+            
+            <header class="card-header">
+                <span class="prop-nome">{{ v.proprietario.nome_completo }}</span>
+                <span class="prop-cidade">📍 {{ v.proprietario.cidade }}</span>
+                
+                <div class="veiculo-info-linha">
+                    <span class="veiculo-texto">{{ v.marca }} {{ v.modelo }} ({{ v.cor }})</span>
+                    <span class="placa-pill">{{ v.matricula }}</span>
+                </div>
+            </header>
+
+            <div class="fotos-galeria">
+                {% if v.foto_frontal %}<img src="{{ v.foto_frontal.url }}" class="foto-veiculo">{% endif %}
+                {% if v.foto_traseira %}<img src="{{ v.foto_traseira.url }}" class="foto-veiculo">{% endif %}
+                {% if v.foto_lateralE %}<img src="{{ v.foto_lateralE.url }}" class="foto-veiculo">{% endif %}
+                {% if v.foto_lateralD %}<img src="{{ v.foto_lateralD.url }}" class="foto-veiculo">{% endif %}
+            </div>
+
+            <div class="card-body">
+                <p class="secao-titulo">Histórico de Infrações</p>
+                
+                {% for m in v.multas.all %}
+                <div class="multa-tag">
+                    <span class="multa-valor">R$ {{ m.valor }}</span>
+                    <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
+                    <span class="multa-meta">📅 {{ m.data|date:"d/m/Y" }} • Agente: {{ m.agente }}</span>
+                </div>
+                {% empty %}
+                <p style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">✅ Nenhuma irregularidade.</p>
+                {% endfor %}
+
+                <a href="{% url 'multar' v.id %}" class="btn-multar">🚨 APLICAR MULTA</a>
+            </div>
+
+        </article>
+        {% empty %}
+        <p style="text-align: center; color: #64748b; margin-top: 50px;">Nenhum veículo na base de dados.</p>
+        {% endfor %}
+    </main>
+
+</body>
+</html>

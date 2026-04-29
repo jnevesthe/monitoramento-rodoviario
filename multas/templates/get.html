@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Veículo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Reset básico e tipografia */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container estilo Cartão */
+        .container {
+            background-color: #ffffff;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h1 {
+            color: #003366;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 16px;
+            background-color: #fafafa;
+            transition: border 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        select:focus {
+            border: 1px solid #003366;
+            box-shadow: 0 0 5px rgba(0, 51, 102, 0.2);
+            background-color: #fff;
+        }
+
+        /* Estilização específica do input de ficheiro */
+        input[type="file"] {
+            padding: 9px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: #003366;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #00509e;
+        }
+
+        p.erro {
+            color: #d9534f;
+            background-color: #fdf7f7;
+            border: 1px solid #d9534f;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Buscar Proprietário</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="tipo_busca">Tipo de Busca:</label>
+                <select name="tipo_busca" id="tipo_busca" onchange="alternarCampos()">
+                    <option value="texto">Por Matrícula (Texto)</option>
+                    <option value="foto">Por Foto do Veículo</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="grupo_texto">
+                <label for="matricula">Matrícula do Veículo:</label>
+                <input type="text" name="matricula" id="matricula" placeholder="Ex: LD-12-34-AB">
+            </div>
+
+            <div class="form-group" id="grupo_foto" style="display: none;">
+                <label for="foto">Anexar Foto:</label>
+                <input type="file" name="foto" id="foto" accept="image/*">
+            </div>
+
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% if erro %}
+            <p class="erro">{{ erro }}</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function alternarCampos() {
+            var tipoBusca = document.getElementById("tipo_busca").value;
+            var grupoTexto = document.getElementById("grupo_texto");
+            var grupoFoto = document.getElementById("grupo_foto");
+            var inputMatricula = document.getElementById("matricula");
+            var inputFoto = document.getElementById("foto");
+
+            if (tipoBusca === "texto") {
+                // Mostrar texto, esconder foto
+                grupoTexto.style.display = "flex";
+                grupoFoto.style.display = "none";
+                
+                // Exigir o texto, remover exigência da foto
+                inputMatricula.setAttribute("required", "required");
+                inputFoto.removeAttribute("required");
+                
+                // Limpar o valor do input oculto para não enviar dados errados
+                inputFoto.value = ""; 
+            } else {
+                // Mostrar foto, esconder texto
+                grupoTexto.style.display = "none";
+                grupoFoto.style.display = "flex";
+                
+                // Exigir a foto, remover exigência do texto
+                inputFoto.setAttribute("required", "required");
+                inputMatricula.removeAttribute("required");
+                
+                // Limpar o valor do input oculto
+                inputMatricula.value = "";
+            }
+        }
+
+        // Executar a função uma vez assim que a página carrega para garantir 
+        // que os atributos "required" comecem corretos.
+        window.onload = alternarCampos;
+    </script>
+
+</body>
+</html>

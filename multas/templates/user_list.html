@@ -1,0 +1,21 @@
+<h2>Lista de Usuários</h2>
+<a href="">+ Criar novo usuário</a>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Usuário</th><th>Email</th><th>Nome Completo</th><th>email</th><th>Ações</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.id }}</td>
+        <td>{{ u.codigo }}</td>
+        <td>{{ u.email}}</td>
+        <td>
+            <a href="{% url 'edit' u.id%}">Editar</a> |
+            <a href="{% url 'delet' u.id %}">Eliminar</a> |
+            <a href="{% url 'detail' u.id%}">Ver Mais</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table

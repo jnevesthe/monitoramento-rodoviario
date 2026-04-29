@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Multa Registrada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #222;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #003366;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1em;
+            margin: 8px 0;
+        }
+
+        strong {
+            color: #00509e;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 18px;
+            margin: 10px 5px 0 0;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
+            transition: background 0.3s;
+        }
+
+        .btn-voltar {
+            background-color: #003366;
+        }
+
+        .btn-voltar:hover {
+            background-color: #00509e;
+        }
+
+        .btn-apagar {
+            background-color: #cc0000;
+        }
+
+        .btn-apagar:hover {
+            background-color: #ff0000;
+        }
+
+        @media (max-width: 500px) {
+            .btn {
+                width: 100%;
+                text-align: center;
+                margin: 10px 0 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Multa registrada com sucesso!</h2>
+
+    <p><strong>Veículo:</strong> {{ multa.veiculo.matricula }}</p>
+    <p><strong>Proprietário:</strong> {{ multa.veiculo.proprietario.nome_completo }}</p>
+    <p><strong>Descrição:</strong> {{ multa.descricao }}</p>
+    <p><strong>Valor:</strong> {{ multa.valor }} kz</p>
+    <p><strong>Data:</strong> {{ multa.data }}</p>
+
+    <a href="{% url 'confirmar_multa1' multa.id  %}" class="btn btn-voltar">Voltar à lista</a>
+    <a href="{% url 'delete1' multa.id %}" class="btn btn-apagar">Apagar</a>
+
+</body>
+</html>

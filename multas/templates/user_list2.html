@@ -1,0 +1,21 @@
+<h2>Lista de Usuários</h2>
+<a href="{% url 'create' %}">+ Criar novo usuário</a>
+
+<!-- Josemar Neves -->
+<table border="1">
+    <tr>
+        <th>ID</th><th>Usuário</th><th>Email</th><th>Nome Completo</th><th>Status</th><th>Ações</th>
+    </tr>
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.id }}</td>
+        <td>{{ user.codigo}}</td>
+        <td>{{ user.id}}</td>
+        <td>
+            <a href="#">Editar</a> |
+            <a href="#">Eliminar</a>
+            <a href="#">Ver Mais</a>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emitir Infração - {{ v.matricula }}</title>
+    <style>
+        :root {
+            --primary-color: #003366;
+            --danger-color: #cc0000;
+            --bg-body: #eef2f7;
+            --card-white: #ffffff;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg-body); 
+            padding-top: 80px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .navbar {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: var(--card-white); padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+
+        .btn-voltar { text-decoration: none; color: var(--primary-color); font-weight: 700; font-size: 0.8rem; }
+        .user-profile { display: flex; align-items: center; gap: 8px; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+        .container { width: 100%; max-width: 450px; padding: 10px; }
+
+        .card-emissao {
+            background: var(--card-white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .header-veiculo {
+            background: var(--primary-color);
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .placa-display {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 900;
+            font-size: 1.4rem;
+        }
+
+        .form-corpo { padding: 20px; }
+
+        /* Área da Foto */
+        .foto-area {
+            width: 100%;
+            min-height: 200px;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .foto-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .btn-capturar {
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        #foto-input { display: none; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .form-corpo input, .form-corpo select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        /* Escondidos por padrão */
+        #container-velocidade, #container-valor { display: none; }
+
+        .btn-enviar {
+            width: 100%;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 400px) {
+            .card-emissao { border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="javascript:history.back()" class="btn-voltar">← CANCELAR</a>
+        <div class="user-profile">
+            <span style="font-size: 0.65rem; font-weight: 700;">@{{ request.user.username }}</span>
+            <div class="user-avatar" style="background:#003366;"></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="card-emissao">
+            <header class="header-veiculo">
+                <div class="placa-display">{{ v.matricula }}</div>
+                <p style="font-size: 0.8rem; margin-top: 5px;">{{ v.marca }} {{ v.modelo }} • {{ v.cor }}</p>
+            </header>
+
+            <form method="POST" enctype="multipart/form-data" class="form-corpo" id="formInfracao">
+                {% csrf_token %}
+                
+                <label for="foto-input" class="foto-area" id="area-preview">
+                    <div class="btn-capturar" id="texto-instrucao">
+                        <span style="font-size: 2rem;">📸</span><br>
+                        TIRAR FOTO DA INFRAÇÃO
+                    </div>
+                    <img id="imagem-preview" src="">
+                </label>
+                <input type="file" id="foto-input" name="foto" accept="image/*" capture="environment" required onchange="processarFoto(this)">
+
+                <div class="input-group">
+                    <label>Tipo de Infração</label>
+                    <select id="tipo_infracao" name="tipo_infracao" required onchange="ajustarCampos()">
+                        <option value="" disabled selected>Selecione a infração...</option>
+                        <option value="excesso_velocidade">Excesso de Velocidade</option>
+                        <option value="sinal_vermelho">Avanço ao Sinal Vermelho</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="container-velocidade">
+                    <label>Velocidade (km/h)</label>
+                    <input type="number" id="velocidade_input" name="velocidade">
+                </div>
+
+                <div class="input-group" id="container-valor">
+                    <label>Valor (Kz)</label>
+                    <input type="number" id="valor_input" name="valor" step="0.01">
+                </div>
+
+                <div class="input-group">
+                    <label>Localização</label>
+                    <input type="text" id="local" name="local" placeholder="Ex: Av. Deolinda Rodrigues" required>
+                </div>
+
+                <button type="submit" class="btn-enviar">CONFIRMAR REGISTRO</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function processarFoto(input) {
+            const preview = document.getElementById('imagem-preview');
+            const instrucao = document.getElementById('texto-instrucao');
+            const area = document.getElementById('area-preview');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    instrucao.style.display = 'none';
+                    area.style.border = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function ajustarCampos() {
+            const tipo = document.getElementById('tipo_infracao').value;
+            const cVel = document.getElementById('container-velocidade');
+            const iVel = document.getElementById('velocidade_input');
+            const cVal = document.getElementById('container-valor');
+            const iVal = document.getElementById('valor_input');
+
+            // Valor automático para Sinal Vermelho
+            const VALOR_SINAL = "15000.00"; 
+
+            if (tipo === 'excesso_velocidade') {
+                cVel.style.display = 'block';
+                iVel.setAttribute('required', 'required');
+                iVel.value = '';
+
+                cVal.style.display = 'block';
+                iVal.setAttribute('required', 'required');
+                iVal.value = '';
+            } else {
+                // Caso Sinal Vermelho: Velocidade 0 e Valor Fixo escondidos
+                cVel.style.display = 'none';
+                iVel.removeAttribute('required');
+                iVel.value = 0; 
+
+                cVal.style.display = 'none';
+                iVal.removeAttribute('required');
+                iVal.value = VALOR_SINAL; 
+            }
+        }
+    </script>
+
+</body>
+</html>
+

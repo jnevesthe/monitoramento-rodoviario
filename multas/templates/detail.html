@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Veículo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f4f6f9; color: #222; }
+        h1 { color: #003366; text-align: center; margin-bottom: 20px; }
+        .veiculo, .multa { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #00509e; }
+        .multa { border-left: 3px solid #cc0000; font-size: 0.9em; background: #e9ecef; }
+        a { text-decoration: none; color: #003366; font-weight: bold; }
+
+     .btn-multar {
+        display: inline-block;
+       background-color: #cc0000; /* vermelho */
+       color: #fff;
+       padding: 6px 12px;
+      margin-top: 5px;
+      border-radius: 4px;
+      text-decoration: none;
+       font-weight: 600;
+      font-size: 0.9em;
+      transition: background 0.3s;
+   }
+
+    .btn-multar:hover {
+        background-color: #ff0000;
+    }
+    </style>
+</head>
+<body>
+
+<h1>Detalhes do Veículo</h1>
+
+<div class="veiculo">
+    <p><strong>Matrícula:</strong> {{ veiculo.matricula }}</p>
+    <p><strong>Marca:</strong> {{ veiculo.marca }}</p>
+    <p><strong>Modelo:</strong> {{ veiculo.modelo }}</p>
+    <p><strong>Cor:</strong> {{ veiculo.cor }}</p>
+    <p><strong>Proprietário:</strong> {{ veiculo.proprietario.nome_completo }}</p>
+    <p><strong>Cidade:</strong> {{ veiculo.proprietario.cidade }}</p>
+    <br> <a href="{% url 'multar' veiculo.id %}" class="btn-multar">Multar</a>
+
+</div>
+
+<h2>Multas do Veículo:</h2>
+{% if veiculo.multas.all %}
+    {% for m in veiculo.multas.all %}
+        <div class="multa">
+            <p><strong>Valor:</strong> {{ m.valor }}</p>
+            <p><strong>Localização:</strong> {{ m.localizacao }}</p>
+            <p><strong>Data:</strong> {{ m.data }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Sem multas registradas.</p>
+{% endif %}
+
+<a href="{% url 'list' %}">&larr; Voltar para Lista de Proprietários</a>
+
+</body>
+</html>
