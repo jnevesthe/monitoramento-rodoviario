@@ -42,7 +42,7 @@ def pagina_404(request, exception=None):
 @login_required
 def multar(request , pk):
     if request.method=='POST':
-        foto = request.POST.get('foto')
+        foto = request.FILES.get('foto')
         valor=request.POST.get('valor')
         local=request.POST.get('local')
         tipo = request.POST.get('tipo_infracao')

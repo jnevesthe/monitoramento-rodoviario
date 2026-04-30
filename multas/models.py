@@ -29,7 +29,7 @@ class Veiculo(models.Model):
 class Multa(models.Model):
 
     veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE, related_name="multas")
-    foto = models.ImageField(upload_to="foto/", null=True)
+    foto = models.ImageField(upload_to="foto/", null=True, blank=True)
     valor = models.DecimalField(max_digits=10, decimal_places=2)
     localizacao = models.CharField(max_length=200)
     data = models.DateTimeField(auto_now_add=True)
