@@ -77,8 +77,8 @@
     <p><strong>Valor:</strong> {{ multa.valor }} kz</p>
     <p><strong>Data:</strong> {{ multa.data }}</p>
 
-    <a href="{% url 'confirmar_multa1' multa.id  %}" class="btn btn-voltar">Voltar à lista</a>
-    <a href="{% url 'delete1' multa.id %}" class="btn btn-apagar">Apagar</a>
+    <a href="{% url 'confirmar_multa' multa.id  %}" class="btn btn-voltar">Voltar à lista</a>
+    <a href="{% url 'delete' multa.id %}" class="btn btn-apagar">Apagar</a>
 
 </body>
 </html>
