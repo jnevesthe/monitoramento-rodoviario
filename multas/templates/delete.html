@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Exclusão da Multa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #222;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #cc0000;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            font-size: 1.1em;
+            margin: 8px 0;
+        }
+
+        strong {
+            color: #00509e;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px 0 0;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-apagar {
+            background-color: #cc0000;
+        }
+
+        .btn-apagar:hover {
+            background-color: #ff0000;
+        }
+
+        .btn-cancelar {
+            background-color: #888;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #555;
+        }
+
+        .botoes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (max-width: 500px) {
+            .btn {
+                width: 100%;
+                margin: 10px 0 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Tem certeza que deseja apagar esta multa?</h2>
+
+    <p><strong>Veículo:</strong> {{ multa.veiculo.matricula }}</p>
+    <p><strong>Proprietário:</strong> {{ multa.veiculo.proprietario.nome_completo }}</p>
+    <p><strong>Local:</strong> {{ multa.local }}</p>
+    <p><strong>Valor:</strong> {{ multa.valor }} kz</p>
+    <p><strong>Data:</strong> {{ multa.data }}</p>
+
+    <div class="botoes">
+        <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-apagar">Apagar</button>
+        </form>
+        <a href="{% url 'list' %}" class="btn btn-cancelar">Cancelar</a>
+    </div>
+
+</body>
+</html>
