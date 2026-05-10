@@ -317,7 +317,7 @@ import requests
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_multar(request):
+def api_multar3(request):
 
     # ---------------- FOTO ----------------
     if 'foto' not in request.FILES:
@@ -373,6 +373,11 @@ def api_multar(request):
 
     else:  # B
         matricula = "LD-45-04-EG"
+    try:
+        veiculo = Veiculo.objects.filter(matricula__icontains=matricula).first()
+        
+    except:
+        veiculo = None
 
     # ---------------- HASH ----------------
     try:
@@ -388,7 +393,7 @@ def api_multar(request):
     # ---------------- MULTA ----------------
     try:
         multa = Multa.objects.create(
-            veiculo=None,
+            veiculo=veiculo,
             foto=arquivo,
             valor=valor,
             localizacao=local,
@@ -404,6 +409,96 @@ def api_multar(request):
     return Response({
         "status": "ok",
         "cor_detectada": cor,
+        "matricula_usada": matricula,
+        "hash_id": hash_id
+    })
+
+
+
+
+import random
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_multar(request):
+
+    # ---------------- FOTO ----------------
+    if 'foto' not in request.FILES:
+        return Response({
+            'erro': 'Foto obrigatória'
+        }, status=400)
+
+    arquivo = request.FILES.get('foto')
+
+    # ---------------- DADOS ----------------
+    velocidade = request.data.get('velocidade')
+    tipo = request.data.get('tipo_infracao', 'desconhecido')
+    local = request.data.get('local', 'Radar automático')
+    valor = request.data.get('valor', 10000)
+
+    # ---------------- VELOCIDADE ----------------
+    try:
+        velocidade = float(velocidade) if velocidade else None
+    except:
+        velocidade = None
+
+    # ---------------- MATRÍCULA RANDOM ----------------
+    numero = random.randint(0, 2)
+
+    if numero == 0:
+        matricula = "LD-45-04-FH"
+
+    elif numero == 1:
+        matricula = "LD-45-04-EG"
+
+    else:
+        matricula = "LD-45-04-AB"
+    try:
+        veiculo = Veiculo.objects.filter(matricula__icontains=matricula).first()
+        
+    except:
+        veiculo = None
+
+    # ---------------- HASH ----------------
+    try:
+        arquivo_bytes = arquivo.read()
+        arquivo.seek(0)
+
+        hash_input = (
+            arquivo_bytes +
+            str(timezone.now()).encode() +
+            matricula.encode()
+        )
+
+        hash_id = hashlib.md5(hash_input).hexdigest()
+
+    except:
+        hash_id = None
+
+    # ---------------- MULTA ----------------
+    try:
+        multa = Multa.objects.create(
+            veiculo=veiculo,
+            foto=arquivo,
+            valor=valor,
+            localizacao=local,
+            data=timezone.now(),
+            tipo=tipo,
+            velocidade=velocidade,
+            agente="admin",
+            confirmada=False
+        )
+
+    except Exception as e:
+        return Response({
+            'erro': 'Falha ao criar multa',
+            'detalhes': str(e)
+        }, status=500)
+
+    # ---------------- RESPOSTA ----------------
+    return Response({
+        "status": "ok",
         "matricula_usada": matricula,
         "hash_id": hash_id
     })
