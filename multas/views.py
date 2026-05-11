@@ -421,7 +421,7 @@ import random
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_multar(request):
+def api_multar24(request):
 
     # ---------------- FOTO ----------------
     if 'foto' not in request.FILES:
@@ -495,6 +495,138 @@ def api_multar(request):
             'erro': 'Falha ao criar multa',
             'detalhes': str(e)
         }, status=500)
+
+    # ---------------- RESPOSTA ----------------
+    return Response({
+        "status": "ok",
+        "matricula_usada": matricula,
+        "hash_id": hash_id
+    })
+
+
+
+import random
+import hashlib
+import io
+from PIL import Image, ImageOps
+
+from django.utils import timezone
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+
+def espelhar_e_recortar(arquivo, faixa):
+    """
+    1. Espelha a imagem horizontalmente.
+    2. Recorta:
+       - faixa1 → metade esquerda  (lado do condutor, pós-espelho)
+       - faixa2 → metade direita
+    Devolve um InMemoryUploadedFile pronto para salvar no model.
+    """
+    img = Image.open(arquivo)
+    img = ImageOps.mirror(img)           # espelho horizontal
+
+    largura, altura = img.size
+    metade = largura // 2
+
+    if faixa == "faixa1":
+        box = (0, 0, metade, altura)     # esquerda
+    else:
+        box = (metade, 0, largura, altura)  # direita (faixa2 ou qualquer outro valor)
+
+    img = img.crop(box)
+
+    # Serializa de volta para JPEG em memória
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", quality=85)
+    buffer.seek(0)
+
+    return InMemoryUploadedFile(
+        buffer,
+        field_name="foto",
+        name="foto.jpg",
+        content_type="image/jpeg",
+        size=buffer.getbuffer().nbytes,
+        charset=None,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_multar(request):
+
+    # ---------------- FOTO ----------------
+    if 'foto' not in request.FILES:
+        return Response({'erro': 'Foto obrigatória'}, status=400)
+
+    arquivo = request.FILES.get('foto')
+
+    # ---------------- DADOS ----------------
+    velocidade = request.data.get('velocidade')
+    tipo       = request.data.get('tipo_infracao', 'desconhecido')
+    local      = request.data.get('local', 'Radar automático')
+    valor      = request.data.get('valor', 10000)
+    faixa      = request.data.get('faixa', 'faixa1')   # novo campo
+
+    # ---------------- VELOCIDADE ----------------
+    try:
+        velocidade = float(velocidade) if velocidade else None
+    except:
+        velocidade = None
+
+    # ---------------- ESPELHAR E RECORTAR ----------------
+    try:
+        arquivo = espelhar_e_recortar(arquivo, faixa)
+    except Exception as e:
+        return Response({'erro': 'Falha ao processar imagem', 'detalhes': str(e)}, status=500)
+
+    # ---------------- MATRÍCULA RANDOM ----------------
+    numero = random.randint(0, 2)
+
+    if numero == 0:
+        matricula = "LD-45-04-FH"
+    elif numero == 1:
+        matricula = "LD-45-04-EG"
+    else:
+        matricula = "LD-45-04-AB"
+
+    try:
+        veiculo = Veiculo.objects.filter(matricula__icontains=matricula).first()
+    except:
+        veiculo = None
+
+    # ---------------- HASH ----------------
+    try:
+        arquivo_bytes = arquivo.read()
+        arquivo.seek(0)
+
+        hash_input = (
+            arquivo_bytes +
+            str(timezone.now()).encode() +
+            matricula.encode()
+        )
+
+        hash_id = hashlib.md5(hash_input).hexdigest()
+    except:
+        hash_id = None
+
+    # ---------------- MULTA ----------------
+    try:
+        multa = Multa.objects.create(
+            veiculo=veiculo,
+            foto=arquivo,
+            valor=valor,
+            localizacao=local,
+            data=timezone.now(),
+            tipo=tipo,
+            velocidade=velocidade,
+            agente="admin",
+            confirmada=False
+        )
+    except Exception as e:
+        return Response({'erro': 'Falha ao criar multa', 'detalhes': str(e)}, status=500)
 
     # ---------------- RESPOSTA ----------------
     return Response({
