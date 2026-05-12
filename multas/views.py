@@ -583,11 +583,11 @@ def api_multar(request):
         return Response({'erro': 'Falha ao processar imagem', 'detalhes': str(e)}, status=500)
 
     # ---------------- MATRÍCULA RANDOM ----------------
-    numero = random.randint(0, 2)
+    
 
-    if numero == 0:
+    if faixa == "faixa1":
         matricula = "LD-45-04-FH"
-    elif numero == 1:
+    elif faixa == "faixa2":
         matricula = "LD-45-04-EG"
     else:
         matricula = "LD-45-04-AB"
