@@ -555,7 +555,7 @@ def espelhar_e_recortar(arquivo, faixa):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_multar132(request):
+def api_multar(request):
 
     # ---------------- FOTO ----------------
     if 'foto' not in request.FILES:
@@ -736,7 +736,7 @@ def api_multar0(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_multar(request):
+def api_multar99(request):
 
     # ---------------- FOTO ----------------
     if 'foto' not in request.FILES:
