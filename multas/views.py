@@ -638,7 +638,7 @@ def api_multar132(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_multar(request):
+def api_multar0(request):
 
     # ---------------- FOTO ----------------
     if 'foto' not in request.FILES:
@@ -684,6 +684,105 @@ def api_multar(request):
             matricula = "LD-45-04-AB"
 
         arquivo.seek(0)  # reset após leitura do PIL
+    except:
+        cor = "outro"
+        matricula = "LD-45-04-AB"
+
+    # ---------------- VEÍCULO ----------------
+    try:
+        veiculo = Veiculo.objects.filter(matricula__icontains=matricula).first()
+    except:
+        veiculo = None
+
+    # ---------------- HASH ----------------
+    try:
+        arquivo_bytes = arquivo.read()
+        arquivo.seek(0)
+
+        hash_input = (
+            arquivo_bytes +
+            str(timezone.now()).encode() +
+            matricula.encode()
+        )
+
+        hash_id = hashlib.md5(hash_input).hexdigest()
+    except:
+        hash_id = None
+
+    # ---------------- MULTA ----------------
+    try:
+        multa = Multa.objects.create(
+            veiculo=veiculo,
+            foto=arquivo,
+            valor=valor,
+            localizacao=local,
+            data=timezone.now(),
+            tipo=tipo,
+            velocidade=velocidade,
+            agente="admin",
+            confirmada=False
+        )
+    except Exception as e:
+        return Response({'erro': 'Falha ao criar multa', 'detalhes': str(e)}, status=500)
+
+    # ---------------- RESPOSTA ----------------
+    return Response({
+        "status": "ok",
+        "matricula_usada": matricula,
+        "cor_detetada": cor,
+        "hash_id": hash_id
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_multar(request):
+
+    # ---------------- FOTO ----------------
+    if 'foto' not in request.FILES:
+        return Response({'erro': 'Foto obrigatória'}, status=400)
+
+    arquivo = request.FILES.get('foto')
+
+    # ---------------- DADOS ----------------
+    velocidade = request.data.get('velocidade')
+    tipo       = request.data.get('tipo_infracao', 'desconhecido')
+    local      = request.data.get('local', 'Radar automático')
+    valor      = request.data.get('valor', 10000)
+    faixa      = request.data.get('faixa', 'faixa1')
+
+    # ---------------- VELOCIDADE ----------------
+    try:
+        velocidade = float(velocidade) if velocidade else None
+    except:
+        velocidade = None
+
+    # ---------------- ESPELHAR E RECORTAR ----------------
+    try:
+        arquivo = espelhar_e_recortar(arquivo, faixa)
+    except Exception as e:
+        return Response({'erro': 'Falha ao processar imagem', 'detalhes': str(e)}, status=500)
+
+    # ---------------- DETEÇÃO DE COR ----------------
+    try:
+        arquivo_bytes = arquivo.read()
+        arquivo.seek(0)
+
+        img = Image.open(io.BytesIO(arquivo_bytes))
+        pixels = np.array(img.convert("RGB").resize((50, 50)), dtype=float)
+        r = pixels[:, :, 0].mean()
+        g = pixels[:, :, 1].mean()
+        b = pixels[:, :, 2].mean()
+
+        if r > 150 and r > g * 1.4 and r > b * 1.4:
+            cor = "vermelho"
+            matricula = "LD-45-04-FH"
+        elif b > 100 and b > r * 1.3 and b > g * 1.1:
+            cor = "azul"
+            matricula = "LD-45-04-EG"
+        else:
+            cor = "outro"
+            matricula = "LD-45-04-AB"
     except:
         cor = "outro"
         matricula = "LD-45-04-AB"
