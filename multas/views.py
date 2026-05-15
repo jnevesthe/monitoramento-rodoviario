@@ -774,10 +774,10 @@ def api_multar(request):
         g = pixels[:, :, 1].mean()
         b = pixels[:, :, 2].mean()
 
-        if r > 150 and r > g * 1.4 and r > b * 1.4:
+        if r > 70 and r > g * 0.9 and r > b * 0.9:
             cor = "vermelho"
             matricula = "LD-45-04-FH"
-        elif b > 100 and b > r * 1.3 and b > g * 1.1:
+        elif b > 60 and b > r * 0.7 and b > g * 0.7:
             cor = "azul"
             matricula = "LD-45-04-EG"
         else:
