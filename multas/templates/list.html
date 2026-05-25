@@ -171,7 +171,7 @@
                 <div class="multa-tag">
                     <span class="multa-valor">R$ {{ m.valor }}</span>
                     <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
-                    <span class="multa-meta">📅 {{ m.data|date:"d/m/Y" }} • Agente: {{ m.agente }}</span>
+                    <span class="multa-meta">📅 {{ m.data|date:"d/m/Y H:i" }} • Agente: {{ m.agente }}</span>
                 </div>
                 {% empty %}
                 <p style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">✅ Nenhuma irregularidade.</p>
