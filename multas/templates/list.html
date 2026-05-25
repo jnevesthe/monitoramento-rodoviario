@@ -130,8 +130,8 @@
 
     <nav class="navbar">
         <div class="navbar-links">
-            <a href="{% url 'veiculo_list' %}" class="navbar-link">🚗 Listar</a>
-            <a href="{% url 'veiculo_get' %}" class="navbar-link">🔍 Consultar</a>
+            <a href="{% url 'list' %}" class="navbar-link">🚗 Listar</a>
+            <a href="{% url 'get' %}" class="navbar-link">🔍 Consultar</a>
         </div>
         <a href="{% url 'logout_confirm' %}" class="user-profile-box">
             {% if request.user.foto %}
