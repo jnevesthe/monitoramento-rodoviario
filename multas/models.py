@@ -4,6 +4,7 @@ from django.db import models
 class Proprietario(models.Model):
     nome_completo = models.CharField(max_length=150)
     cidade = models.CharField(max_length=250)
+    email = models.CharField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.nome_completo}"
