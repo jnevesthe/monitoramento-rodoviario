@@ -16,7 +16,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); padding-top: 100px; }
 
-        /* --- NAVBAR --- */
         .navbar {
             position: fixed; top: 0; width: 100%; height: 80px;
             background: var(--card-white); padding: 0 20px;
@@ -24,9 +23,7 @@
             display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
 
-        .navbar-links {
-            display: flex; gap: 10px;
-        }
+        .navbar-links { display: flex; gap: 10px; }
 
         .navbar-link {
             background: #f1f5f9; color: var(--primary-color);
@@ -50,7 +47,6 @@
             font-size: 0.7rem; color: #444; font-weight: 700; margin-top: 4px; text-transform: lowercase;
         }
 
-        /* --- CONTEÚDO PRINCIPAL --- */
         .container { max-width: 500px; margin: 0 auto; padding: 10px; }
 
         .registro-card {
@@ -73,11 +69,8 @@
 
         .veiculo-info-linha {
             background: rgba(255, 255, 255, 0.15);
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 10px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
         .veiculo-texto { font-size: 0.9rem; font-weight: 600; }
@@ -111,6 +104,17 @@
         .multa-valor { color: var(--danger-color); font-weight: 800; font-size: 1rem; }
         .multa-meta { display: block; font-size: 0.75rem; color: #7f8c8d; margin-top: 4px; }
 
+        .foto-multa-thumb {
+            width: 80px; height: 60px;
+            border-radius: 6px; margin-top: 8px;
+            object-fit: cover; cursor: pointer;
+            border: 2px solid #fca5a5;
+            display: block;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        .foto-multa-thumb:active { transform: scale(0.95); border-color: var(--danger-color); }
+
         .btn-multar {
             display: block; width: 100%; background: var(--danger-color);
             color: white; text-align: center; padding: 15px; border-radius: 12px;
@@ -119,6 +123,27 @@
         }
 
         .btn-multar:active { transform: scale(0.97); }
+
+        /* MODAL */
+        #fotoModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+
+        #fotoModal.aberto { display: flex; }
+
+        #fotoModalImg {
+            max-width: 95vw; max-height: 90vh;
+            border-radius: 10px; object-fit: contain;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        #fotoModalFechar {
+            position: fixed; top: 16px; right: 20px;
+            color: white; font-size: 2rem; font-weight: 900;
+            cursor: pointer; line-height: 1; user-select: none;
+        }
 
         @media (max-width: 480px) {
             .fotos-galeria { grid-template-columns: 1fr; }
@@ -169,10 +194,18 @@
 
                 {% for m in v.multas.all %}
                 <div class="multa-tag">
-                    <span class="multa-valor">R$ {{ m.valor }}</span>
-                    <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
-                    <span class="multa-meta">📅 {{ m.data|date:"d/m/Y H:i" }} • Agente: {{ m.agente }}</span>
-                </div>
+    <span class="multa-valor">R$ {{ m.valor }}</span>
+    <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
+    <span class="multa-meta">🏷 Tipo: {{ m.tipo }}</span>
+    <span class="multa-meta">📅 Data: {{ m.data|date:"d/m/Y H:i" }}</span>
+    <span class="multa-meta">👮 Agente: {{ m.agente }}</span>
+    {% if m.foto %}
+    <img src="{{ m.foto.url }}"
+         class="foto-multa-thumb"
+         onclick="abrirModal(this.src)"
+         alt="Foto da infração">
+    {% endif %}
+</div>
                 {% empty %}
                 <p style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">✅ Nenhuma irregularidade.</p>
                 {% endfor %}
@@ -185,6 +218,25 @@
         <p style="text-align: center; color: #64748b; margin-top: 50px;">Nenhum veículo na base de dados.</p>
         {% endfor %}
     </main>
+
+    <!-- MODAL FOTO -->
+    <div id="fotoModal" onclick="fecharModal()">
+        <span id="fotoModalFechar" onclick="fecharModal()">✕</span>
+        <img id="fotoModalImg" src="" alt="Foto ampliada">
+    </div>
+
+    <script>
+        function abrirModal(src) {
+            document.getElementById('fotoModalImg').src = src;
+            document.getElementById('fotoModal').classList.add('aberto');
+        }
+        function fecharModal() {
+            document.getElementById('fotoModal').classList.remove('aberto');
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') fecharModal();
+        });
+    </script>
 
 </body>
 </html>

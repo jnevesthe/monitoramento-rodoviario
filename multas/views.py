@@ -187,7 +187,7 @@ def listb(request):
     # prefetch_related busca todas as multas associadas (Related Name)
     veiculos = Veiculo.objects.select_related('proprietario').prefetch_related('multas').all()
     
-    return render(request, 'listb.html', {'veiculos': veiculos})
+    return render(request, 'list.html', {'veiculos': veiculos})
 
 
 @login_required

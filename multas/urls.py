@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path('api/multar/', views.api_multar, name='api_multar'),
-    path('list/', List.as_view(), name='list'),
+    path('', List.as_view(), name='list'),
     path('listb/', views.listb, name='listb'),
     path('logout_confirm/', views.logout_confirm, name='logout_confirm'),
     path('list/<int:pk>/', Detail.as_view(), name='lista'),

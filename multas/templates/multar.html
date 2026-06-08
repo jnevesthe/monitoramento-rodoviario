@@ -14,9 +14,9 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            background-color: var(--bg-body); 
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-body);
             padding-top: 80px;
             display: flex;
             justify-content: center;
@@ -30,8 +30,27 @@
         }
 
         .btn-voltar { text-decoration: none; color: var(--primary-color); font-weight: 700; font-size: 0.8rem; }
+
         .user-profile { display: flex; align-items: center; gap: 8px; }
-        .user-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
+        .user-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-placeholder {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.9rem;
+            flex-shrink: 0;
+        }
 
         .container { width: 100%; max-width: 450px; padding: 10px; }
 
@@ -62,7 +81,6 @@
 
         .form-corpo { padding: 20px; }
 
-        /* Área da Foto */
         .foto-area {
             width: 100%;
             min-height: 200px;
@@ -114,7 +132,6 @@
             outline: none;
         }
 
-        /* Escondidos por padrão */
         #container-velocidade, #container-valor { display: none; }
 
         .btn-enviar {
@@ -141,7 +158,11 @@
         <a href="javascript:history.back()" class="btn-voltar">← CANCELAR</a>
         <div class="user-profile">
             <span style="font-size: 0.65rem; font-weight: 700;">@{{ request.user.username }}</span>
-            <div class="user-avatar" style="background:#003366;"></div>
+            {% if request.user.foto %}
+                <img src="{{ request.user.foto.url }}" class="user-avatar" alt="Foto de perfil">
+            {% else %}
+                <div class="user-avatar-placeholder">👤</div>
+            {% endif %}
         </div>
     </nav>
 
@@ -154,7 +175,7 @@
 
             <form method="POST" enctype="multipart/form-data" class="form-corpo" id="formInfracao">
                 {% csrf_token %}
-                
+
                 <label for="foto-input" class="foto-area" id="area-preview">
                     <div class="btn-capturar" id="texto-instrucao">
                         <span style="font-size: 2rem;">📸</span><br>
@@ -218,8 +239,7 @@
             const cVal = document.getElementById('container-valor');
             const iVal = document.getElementById('valor_input');
 
-            // Valor automático para Sinal Vermelho
-            const VALOR_SINAL = "15000.00"; 
+            const VALOR_SINAL = "15000.00";
 
             if (tipo === 'excesso_velocidade') {
                 cVel.style.display = 'block';
@@ -230,18 +250,16 @@
                 iVal.setAttribute('required', 'required');
                 iVal.value = '';
             } else {
-                // Caso Sinal Vermelho: Velocidade 0 e Valor Fixo escondidos
                 cVel.style.display = 'none';
                 iVel.removeAttribute('required');
-                iVel.value = 0; 
+                iVel.value = 0;
 
                 cVal.style.display = 'none';
                 iVal.removeAttribute('required');
-                iVal.value = VALOR_SINAL; 
+                iVal.value = VALOR_SINAL;
             }
         }
     </script>
 
 </body>
 </html>
-

@@ -2,94 +2,213 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmar Exclusão da Multa</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Confirmar Exclusão</title>
     <style>
+        :root {
+            --primary-color: #003366;
+            --accent-color: #00509e;
+            --danger-color: #cc0000;
+            --bg-body: #eef2f7;
+            --card-white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            color: #222;
-            padding: 20px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        h2 {
-            color: #cc0000;
-            margin-bottom: 20px;
-            text-align: center;
+        .container { width: 100%; max-width: 460px; }
+
+        .registro-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border: 1px solid #d1d5db;
         }
 
-        p {
-            font-size: 1.1em;
-            margin: 8px 0;
+        .card-header {
+            background: linear-gradient(135deg, var(--danger-color), #ff4444);
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        strong {
-            color: #00509e;
+        .warn-icon {
+            width: 44px; height: 44px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; flex-shrink: 0;
         }
+
+        .card-header h2 { font-size: 1rem; font-weight: 800; line-height: 1.4; }
+        .card-header span { font-size: 0.78rem; opacity: 0.85; }
+
+        .card-body { padding: 20px; }
+
+        .secao-titulo {
+            font-size: 0.75rem; color: #64748b; font-weight: 800;
+            text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;
+        }
+
+        .multa-tag {
+            background: #fff1f2;
+            border-left: 4px solid var(--danger-color);
+            padding: 14px; border-radius: 6px; margin-bottom: 16px;
+        }
+
+        .multa-valor { color: var(--danger-color); font-weight: 800; font-size: 1.3rem; }
+        .multa-meta { display: block; font-size: 0.8rem; color: #7f8c8d; margin-top: 6px; }
+
+        .foto-infracao {
+            width: 100%; border-radius: 10px;
+            object-fit: cover; max-height: 200px;
+            margin-bottom: 16px; cursor: pointer;
+            border: 2px solid #fca5a5;
+            display: block;
+        }
+
+        .info-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; background: #f8fafc;
+            border-radius: 8px; border: 1px solid #e2e8f0;
+        }
+
+        .info-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+        .info-value { font-size: 0.88rem; color: #1e293b; font-weight: 600; text-align: right; }
+
+        .placa-pill {
+            background: var(--primary-color); color: white;
+            padding: 3px 10px; border-radius: 6px;
+            font-family: monospace; font-weight: 900; font-size: 0.9rem;
+        }
+
+        .btn-group { display: flex; gap: 10px; }
 
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px 5px 0 0;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            color: #fff;
-            border: none;
-            transition: background 0.3s;
+            flex: 1; padding: 14px;
+            border-radius: 12px; border: none;
+            font-weight: 800; font-size: 0.9rem;
+            cursor: pointer; text-decoration: none;
+            text-align: center; transition: transform 0.2s;
+            display: block;
         }
 
-        .btn-apagar {
-            background-color: #cc0000;
+        .btn:active { transform: scale(0.97); }
+        .btn-cancelar { background: #94a3b8; color: white; }
+        .btn-apagar { background: var(--danger-color); color: white; }
+
+        /* MODAL */
+        #fotoModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        #fotoModal.aberto { display: flex; }
+        #fotoModalImg {
+            max-width: 95vw; max-height: 90vh;
+            border-radius: 10px; object-fit: contain;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+        #fotoModalFechar {
+            position: fixed; top: 16px; right: 20px;
+            color: white; font-size: 2rem; font-weight: 900;
+            cursor: pointer; line-height: 1; user-select: none;
         }
 
-        .btn-apagar:hover {
-            background-color: #ff0000;
-        }
-
-        .btn-cancelar {
-            background-color: #888;
-        }
-
-        .btn-cancelar:hover {
-            background-color: #555;
-        }
-
-        .botoes {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        @media (max-width: 500px) {
-            .btn {
-                width: 100%;
-                margin: 10px 0 0 0;
-            }
+        @media (max-width: 400px) {
+            .btn-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <h2>Tem certeza que deseja apagar esta multa?</h2>
+    <div class="container">
+        <div class="registro-card">
 
-    <p><strong>Veículo:</strong> {{ multa.veiculo.matricula }}</p>
-    <p><strong>Proprietário:</strong> {{ multa.veiculo.proprietario.nome_completo }}</p>
-    <p><strong>Local:</strong> {{ multa.local }}</p>
-    <p><strong>Valor:</strong> {{ multa.valor }} kz</p>
-    <p><strong>Data:</strong> {{ multa.data }}</p>
+            <div class="card-header">
+                <div class="warn-icon">⚠️</div>
+                <div>
+                    <h2>Tem certeza que deseja apagar esta multa?</h2>
+                    <span>Esta ação não pode ser desfeita.</span>
+                </div>
+            </div>
 
-    <div class="botoes">
-        <form method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-apagar">Apagar</button>
-        </form>
-        <a href="{% url 'list' %}" class="btn btn-cancelar">Cancelar</a>
+            <div class="card-body">
+
+                {% if multa.foto %}
+                <p class="secao-titulo">Foto da Infração</p>
+                <img src="{{ multa.foto.url }}"
+                     class="foto-infracao"
+                     onclick="abrirModal(this.src)"
+                     alt="Foto da infração">
+                {% endif %}
+
+                <p class="secao-titulo">Infração</p>
+                <div class="multa-tag">
+                    <div class="multa-valor">{{ multa.valor }} kz</div>
+                    <span class="multa-meta">🏷 Tipo: {{ multa.tipo }}</span>
+                    {% if multa.velocidade %}
+                    <span class="multa-meta">🚀 Velocidade: {{ multa.velocidade }} km/h</span>
+                    {% endif %}
+                    <span class="multa-meta">📍 Local: {{ multa.local }}</span>
+                    <span class="multa-meta">📅 Data: {{ multa.data|date:"d/m/Y H:i" }}</span>
+                </div>
+
+                <p class="secao-titulo">Dados do Veículo</p>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Matrícula</span>
+                        <span class="placa-pill">{{ multa.veiculo.matricula }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Proprietário</span>
+                        <span class="info-value">{{ multa.veiculo.proprietario.nome_completo }}</span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{% url 'list' %}" class="btn btn-cancelar">← Cancelar</a>
+                    <form method="post" style="flex:1; display:contents;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-apagar">🗑 Apagar</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </div>
+
+    <!-- MODAL FOTO -->
+    <div id="fotoModal" onclick="fecharModal()">
+        <span id="fotoModalFechar" onclick="fecharModal()">✕</span>
+        <img id="fotoModalImg" src="" alt="Foto ampliada">
+    </div>
+
+    <script>
+        function abrirModal(src) {
+            document.getElementById('fotoModalImg').src = src;
+            document.getElementById('fotoModal').classList.add('aberto');
+        }
+        function fecharModal() {
+            document.getElementById('fotoModal').classList.remove('aberto');
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') fecharModal();
+        });
+    </script>
 
 </body>
 </html>

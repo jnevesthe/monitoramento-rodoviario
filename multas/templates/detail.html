@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Detalhes do Veículo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Detalhes do Veículo</title>
     <style>
         :root {
             --primary-color: #003366;
@@ -16,9 +16,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); padding: 20px; color: #222; }
 
-        h1 { color: var(--primary-color); text-align: center; margin-bottom: 20px; }
-        h2 { color: var(--primary-color); margin-bottom: 10px; }
-
         .veiculo {
             background: var(--card-white);
             border-radius: 20px;
@@ -26,6 +23,9 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.08);
             border: 1px solid #d1d5db;
             margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .card-header {
@@ -39,11 +39,8 @@
 
         .veiculo-info-linha {
             background: rgba(255,255,255,0.15);
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 10px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
         .veiculo-texto { font-size: 0.9rem; font-weight: 600; }
@@ -59,13 +56,24 @@
             text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;
         }
 
-        .multa {
+        .multa-tag {
             background: #fff1f2; border-left: 4px solid var(--danger-color);
             padding: 12px; border-radius: 6px; margin-bottom: 8px;
         }
 
         .multa-valor { color: var(--danger-color); font-weight: 800; font-size: 1rem; }
         .multa-meta { display: block; font-size: 0.75rem; color: #7f8c8d; margin-top: 4px; }
+
+        .foto-multa-thumb {
+            width: 80px; height: 60px;
+            border-radius: 6px; margin-top: 8px;
+            object-fit: cover; cursor: pointer;
+            border: 2px solid #fca5a5;
+            display: block;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        .foto-multa-thumb:active { transform: scale(0.95); border-color: var(--danger-color); }
 
         .btn-multar {
             display: block; width: 100%; background: var(--danger-color);
@@ -76,12 +84,33 @@
 
         .btn-multar:active { transform: scale(0.97); }
 
-        a.voltar { text-decoration: none; color: var(--primary-color); font-weight: bold; display: inline-block; margin-top: 20px; }
+        .btn-voltar {
+            display: block; text-align: center;
+            text-decoration: none; color: var(--primary-color);
+            font-weight: 700; margin-top: 10px;
+            max-width: 500px; margin-left: auto; margin-right: auto;
+        }
+
+        /* MODAL */
+        #fotoModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        #fotoModal.aberto { display: flex; }
+        #fotoModalImg {
+            max-width: 95vw; max-height: 90vh;
+            border-radius: 10px; object-fit: contain;
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+        #fotoModalFechar {
+            position: fixed; top: 16px; right: 20px;
+            color: white; font-size: 2rem; font-weight: 900;
+            cursor: pointer; line-height: 1; user-select: none;
+        }
     </style>
 </head>
 <body>
-
-<h1>Detalhes do Veículo</h1>
 
 <div class="veiculo">
     <header class="card-header">
@@ -94,25 +123,50 @@
     </header>
 
     <div class="card-body">
-        <p class="secao-titulo">Multas do Veículo</p>
+        <p class="secao-titulo">Histórico de Infrações</p>
 
-        {% if veiculo.multas.all %}
-            {% for m in veiculo.multas.all %}
-            <div class="multa">
-                <span class="multa-valor">R$ {{ m.valor }}</span>
-                <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
-                <span class="multa-meta">📅 {{ m.data|date:"d/m/Y H:i" }} • Agente: {{ m.agente }}</span>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">✅ Sem multas registradas.</p>
-        {% endif %}
+        {% for m in veiculo.multas.all %}
+        <div class="multa-tag">
+            <span class="multa-valor">R$ {{ m.valor }}</span>
+            <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
+            <span class="multa-meta">🏷 Tipo: {{ m.tipo }}</span>
+            <span class="multa-meta">📅 Data: {{ m.data|date:"d/m/Y H:i" }}</span>
+            <span class="multa-meta">👮 Agente: {{ m.agente }}</span>
+            {% if m.foto %}
+            <img src="{{ m.foto.url }}"
+                 class="foto-multa-thumb"
+                 onclick="abrirModal(this.src)"
+                 alt="Foto da infração">
+            {% endif %}
+        </div>
+        {% empty %}
+        <p style="color: #10b981; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px;">✅ Sem multas registradas.</p>
+        {% endfor %}
 
         <a href="{% url 'multar' veiculo.id %}" class="btn-multar">🚨 APLICAR MULTA</a>
     </div>
 </div>
 
-<a href="{% url 'list' %}" class="voltar">&larr; Voltar para Lista</a>
+<a href="{% url 'list' %}" class="btn-voltar">← Voltar para Lista</a>
+
+<!-- MODAL FOTO -->
+<div id="fotoModal" onclick="fecharModal()">
+    <span id="fotoModalFechar" onclick="fecharModal()">✕</span>
+    <img id="fotoModalImg" src="" alt="Foto ampliada">
+</div>
+
+<script>
+    function abrirModal(src) {
+        document.getElementById('fotoModalImg').src = src;
+        document.getElementById('fotoModal').classList.add('aberto');
+    }
+    function fecharModal() {
+        document.getElementById('fotoModal').classList.remove('aberto');
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fecharModal();
+    });
+</script>
 
 </body>
 </html>
