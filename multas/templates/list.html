@@ -194,7 +194,7 @@
 
                 {% for m in v.multas.all %}
                 <div class="multa-tag">
-    <span class="multa-valor">R$ {{ m.valor }}</span>
+    <span class="multa-valor">{{ m.valor }} KZ</span>
     <span style="font-size: 0.85rem; color: #1e293b; margin-left: 5px;">| {{ m.localizacao }}</span>
     <span class="multa-meta">🏷 Tipo: {{ m.tipo }}</span>
     <span class="multa-meta">📅 Data: {{ m.data|date:"d/m/Y H:i" }}</span>
